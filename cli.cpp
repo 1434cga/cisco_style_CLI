@@ -2,6 +2,9 @@
 #include <vector>
 #include <map>
 
+#include <termios.h>
+#include <unistd.h>
+
 using namespace std;
 
 
@@ -32,30 +35,30 @@ moduleMap rootMap = {       // initialize
 };
 
 enum class ArgumentType {
-    STRING,
-    INT,
-    HEX,
-    IP
+    String,
+    Int,
+    Hex,
+    Ip,
 };
 
 std::ostream& operator << (std::ostream& os, const ArgumentType &at)
 {
     switch(at)
     {
-        case ArgumentType::STRING: os << "STRING"; break;
-        case ArgumentType::INT: os << "INT"; break;
-        case ArgumentType::HEX: os << "HEX"; break;
-        case ArgumentType::IP: os << "IP"; break;
+        case ArgumentType::String: os << "String"; break;
+        case ArgumentType::Int: os << "Int"; break;
+        case ArgumentType::Hex: os << "Hex"; break;
+        case ArgumentType::Ip: os << "Ip"; break;
     }
     return os;
 }
 
 class Argument {
 public:
+    string name;
     string desc;
     ArgumentType type;
-    int kpi;
-    Argument(string d , ArgumentType t , int k) : desc(d),type(t),kpi(k){}
+    Argument(string n , string d, ArgumentType t) : name(n),desc(d),type(t){}
     ~Argument() {}
 };
 
@@ -63,6 +66,13 @@ using argV = vector<Argument>;
 using apiM = map<string , argV >;
 using moduleM = map<string , apiM >;
 
+/*
+map<string ,    // modulename 
+    map<string,  // api function name 
+        vector<class <string,string,enum>>     // argument name , argument type
+    >
+>;
+*/
 moduleM rootVariant = {       // initialize
     {       // moduleM map
         "A" ,      // string : module name
@@ -70,9 +80,9 @@ moduleM rootVariant = {       // initialize
             {   // first element of apiM map
                 "func1" ,  // api function
                 {   // argV vector
-                    { "argname", ArgumentType::STRING , 5}, // argument 1
-                    { "int", ArgumentType::INT , 10}, // argument 2
-                    { "hexa", ArgumentType::HEX , 10}, // argument 2
+                    { "name-string", "description string for A" , ArgumentType::String}, // argument 1
+                    { "name-int", "description integer for A" , ArgumentType::Int}, // argument 2
+                    { "name-hexa", "description hexa for A" , ArgumentType::Hex}, // argument 3
                 }
             },
         },
@@ -98,12 +108,34 @@ main()
         for (apiM::iterator itapiM=itmoduleM->second.begin(); itapiM!=itmoduleM->second.end(); ++itapiM){
             cout << "\tapiM first : " << itapiM->first << " => " << '\n';
             for (argV::iterator itargV=itapiM->second.begin(); itargV!=itapiM->second.end(); ++itargV){
-                cout << "\t\targV desc : " << itargV->desc << " => " << static_cast<int>(itargV->type) << " => " << itargV->kpi << '\n';
-                cout << "\t\targV desc : " << itargV->desc << " => " << itargV->type << " => " << itargV->kpi << '\n';
+                // cout << "\t\targV desc : " << itargV->name << " => " << static_cast<int>(itargV->type) << " => " << itargV->desc << '\n';
+                cout << "\t\targV desc : " << itargV->name << " => " << itargV->type << " => " << itargV->desc << '\n';
             }
         }
     }
     cout << endl;
+
+    struct termios old_tio, new_tio;
+    tcgetattr(STDIN_FILENO, &old_tio);
+    new_tio = old_tio;
+    new_tio.c_lflag &= ~(ECHO | ECHOE | ICANON);
+    tcsetattr(STDIN_FILENO, TCSANOW, &new_tio);
+    char c;
+    while (fread(&c, 1, 1, stdin)){
+        switch(c){
+            case '\t':
+                std::cout << "tab"  << std::endl;
+                break;
+            case '\b':
+                printf("\b");
+                printf(" ");
+                printf("\b");
+                // std::cout << "backspace" << std::endl;
+                break;
+            default :
+                cout << c;
+        }
+    }
 
     return 0;
 }
