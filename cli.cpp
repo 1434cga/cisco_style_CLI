@@ -35,6 +35,7 @@ moduleMap rootMap = {       // initialize
 };
 
 enum class ArgumentType {
+    None,
     String,
     Int,
     Hex,
@@ -45,6 +46,7 @@ std::ostream& operator << (std::ostream& os, const ArgumentType &at)
 {
     switch(at)
     {
+        case ArgumentType::None: os << "None"; break;
         case ArgumentType::String: os << "String"; break;
         case ArgumentType::Int: os << "Int"; break;
         case ArgumentType::Hex: os << "Hex"; break;
@@ -60,6 +62,10 @@ public:
     ArgumentType type;
     Argument(string n , string d, ArgumentType t) : name(n),desc(d),type(t){}
     ~Argument() {}
+    bool operator< (const Argument& userObj) const
+    {
+        return userObj.name < this->name;
+    }
 };
 
 using argV = vector<Argument>;
@@ -89,6 +95,91 @@ moduleM rootVariant = {       // initialize
     },
 };
 
+struct Comparator {
+public:
+    bool operator()(const Argument& c1, const Argument& c2){
+        return c1.name < c2.name ;
+    }
+};
+
+struct AAA {
+public:
+    string name;
+    string desc;
+    ArgumentType type;
+    AAA(string n , string d, ArgumentType t) : name(n),desc(d),type(t){}
+    ~AAA() {}
+    bool operator< (const AAA& userObj) const
+    {
+        return userObj.name < this->name;
+    }
+};
+
+using testArg = vector<AAA>;
+using testApi = map<AAA,testArg>;
+using testMod = map<AAA, testApi >;
+
+
+testArg testarg = {
+                    { "name-string", "description string for A" , ArgumentType::String}, // argument 1
+                    { "name-int", "description integer for A" , ArgumentType::Int}, // argument 2
+                    { "name-hexa", "description hexa for A" , ArgumentType::Hex}, // argument 3
+};
+
+testApi testapi = {
+    { // testApi map
+        {"wifi" , "wifi is our first module" , ArgumentType::None }, // AAA
+        {   // vector<AAA> = testArg
+            { "name-string", "description string for A" , ArgumentType::String}, // argument 1
+            { "name-int", "description integer for A" , ArgumentType::Int}, // argument 2
+            { "name-hexa", "description hexa for A" , ArgumentType::Hex}, // argument 3
+        }
+    },
+};
+
+testMod testmod = {       // testMod
+    {       // testMod map <AAA,testApi>
+        {"wifi" , "wifi is our first module" , ArgumentType::None }, // AAA
+        {   // testApi
+            { // testApi map
+                {"wifi-api1" , "wifi-api1 is our first module" , ArgumentType::None }, // AAA
+                {   // testArg
+                    { "name-string", "description string for A" , ArgumentType::String}, // argument 1
+                    { "name-int", "description integer for A" , ArgumentType::Int}, // argument 2
+                    { "name-hexa", "description hexa for A" , ArgumentType::Hex}, // argument 3
+                }
+            },
+            { // testApi map
+                {"wifi-api2" , "wifi-api2 is our first module" , ArgumentType::None }, // AAA
+                {   // testArg
+                    { "name-string", "description string for A" , ArgumentType::String}, // argument 1
+                    { "name-hexa", "description hexa for A" , ArgumentType::Hex}, // argument 2
+                }
+            },
+            { // testApi map
+                {"wifi-api3" , "wifi-api3 is our first module" , ArgumentType::None }, // AAA
+                {   // testArg
+                }
+            },
+        }
+    },
+    {       // testMod map <AAA,testApi>
+        {"dongle" , "dongle is our first module" , ArgumentType::None }, // AAA
+        {   // testApi
+            { // testApi map
+                {"dongle-api" , "dongle-api is our first module" , ArgumentType::None }, // AAA
+                {   // testArg
+                    { "dongle-string", "description string for A" , ArgumentType::String}, // argument 1
+                    { "dongle-int", "description integer for A" , ArgumentType::Int}, // argument 2
+                    { "dongle-hexa", "description hexa for A" , ArgumentType::Hex}, // argument 3
+                    { "dongle-hexa", "description hexa for A" , ArgumentType::Hex}, // argument 3
+                    { "dongle-int", "description integer for A" , ArgumentType::Int}, // argument 5
+                }
+            },
+        }
+    },
+};
+
 int 
 main()
 {
@@ -114,6 +205,24 @@ main()
         }
     }
     cout << endl;
+
+    for (testMod::iterator ittestMod=testmod.begin(); ittestMod!=testmod.end(); ++ittestMod){
+        cout << "testMod first : " << ittestMod->first.name << " => " << ittestMod->first.desc << " => " << ittestMod->first.type << endl;
+        for (testApi::iterator ittestApi=ittestMod->second.begin(); ittestApi!=ittestMod->second.end(); ++ittestApi){
+            cout << "\ttestApi first : " << ittestApi->first.name << " => " << ittestApi->first.desc << " => " << ittestApi->first.type << endl;
+            int cnt = 1;
+            for (testArg::iterator ittestArg=ittestApi->second.begin(); ittestArg!=ittestApi->second.end(); ++ittestArg,++cnt){
+                cout << "\t\tArg[" << cnt << "] testArg desc : " << ittestArg->name << " => " << ittestArg->type << " => " << ittestArg->desc << endl;
+            }
+        }
+    }
+    cout << endl;
+
+
+
+
+
+
 
     struct termios old_tio, new_tio;
     tcgetattr(STDIN_FILENO, &old_tio);
