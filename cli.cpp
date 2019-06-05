@@ -6,6 +6,7 @@
 #include <unistd.h>
 #include <string.h>
 
+
 using namespace std;
 
 
@@ -39,13 +40,14 @@ public:
     ~Argument() {}
     bool operator< (const Argument& userObj) const
     {
-        return userObj.name < this->name;
+        return userObj.name > this->name;
     }
 };
 
 using vectorArg = vector<Argument>;
 using mapApi = map<Argument,vectorArg>;
 using mapMod = map<Argument, mapApi >;
+vector<string> vectorHistory;
 
 
 /*
@@ -67,7 +69,37 @@ mapApi testapi = {
 };
 */
 
+string command = "sldd";
+
 mapMod rootmod = {       // mapMod
+    {       // mapMod map <Argument,mapApi>
+        {"quit" , "quit program" , ArgumentType::None }, // Argument
+        {   // mapApi
+            { // mapApi map
+            },
+        }
+    },
+    {       // mapMod map <Argument,mapApi>
+        {"list" , "show all command lists" , ArgumentType::None }, // Argument
+        {   // mapApi
+            { // mapApi map
+            },
+        }
+    },
+    {       // mapMod map <Argument,mapApi>
+        {"help" , "show all command lists" , ArgumentType::None }, // Argument
+        {   // mapApi
+            { // mapApi map
+            },
+        }
+    },
+    {       // mapMod map <Argument,mapApi>
+        {"history" , "history" , ArgumentType::None }, // Argument
+        {   // mapApi
+            { // mapApi map
+            },
+        }
+    },
     {       // mapMod map <Argument,mapApi>
         {"wifi" , "wifi is our first module" , ArgumentType::None }, // Argument
         {   // mapApi
@@ -80,7 +112,7 @@ mapMod rootmod = {       // mapMod
                 }
             },
             { // mapApi map
-                {"api-api2" , "wifi-api2 is our first module" , ArgumentType::None }, // Argument
+                {"wapi-api2" , "wifi-api2 is our first module" , ArgumentType::None }, // Argument
                 {   // vectorArg
                     { "name-string", "description string for A" , ArgumentType::String}, // argument 1
                     { "name-hexa", "description hexa for A" , ArgumentType::Hex}, // argument 2
@@ -111,15 +143,11 @@ mapMod rootmod = {       // mapMod
 };
 
 
-Argument* 
-getArgument(const int level , const string token,const mapMod* pmapMod,const mapApi* pmapApi,const vectorArg* pvectorArg)
-{
-}
-
 bool
 verifyTokenType(const string& s,const ArgumentType& t)
 {
     bool ret = true;
+    if(s.size() == 0){ return false; }
     switch(t){
         case ArgumentType::None: 
             return true;
@@ -153,6 +181,28 @@ verifyTokenType(const string& s,const ArgumentType& t)
     return false;
 }
 
+string
+findCommonString(const vector<string>& matchedString,const int minSize)
+{
+    string ret;
+    for(int i=0;i<minSize;i++){
+        int flag = 0;
+        for(int idx=0;idx<matchedString.size();idx++){
+            if(matchedString[0][i]  != matchedString[idx][i]){
+                flag = 1;
+                break;
+            }
+        }
+        if(flag == 0){
+            ret.push_back(matchedString[0][i]);
+        } else {
+            break;
+        }
+    }
+    //;; cout << "findCommon:"<<ret<<" ";
+    return ret;
+}
+
 bool
 verifyLastArgument(vector<string>& strToken,string& remained)
 {
@@ -175,25 +225,35 @@ verifyLastArgument(vector<string>& strToken,string& remained)
         if(found == 0){ 
             int matchedCnt=0;
             mapMod::iterator matchedIndex;
+            vector<string> matchedString;
+            int matchedMinSize=BUFSIZ;
             for (itmapMod=rootmod.begin(); itmapMod!=rootmod.end(); ++itmapMod){
                 if(itmapMod->first.name.substr(0,strToken[0].size()) == strToken[0]){
                     matchedCnt++;
                     matchedIndex = itmapMod;
-                    cout << "found >1> mapMod first : " << itmapMod->first.name << " => " << itmapMod->first.desc << " => " << itmapMod->first.type << " token[" << strToken[0] << "]" << endl;
+                    matchedString.push_back(itmapMod->first.name);
+                    if(matchedMinSize > itmapMod->first.name.size()){ 
+                        matchedMinSize = itmapMod->first.name.size();
+                    }
+                    //cout << "found >1> mapMod first : " << itmapMod->first.name << " => " << itmapMod->first.desc << " => " << itmapMod->first.type << " token[" << strToken[0] << "]" << endl;
                 }
-                cout << ">1> mapMod first : " << itmapMod->first.name << " => " << itmapMod->first.desc << " => " << itmapMod->first.type << endl;
+                //cout << ">1> mapMod first : " << itmapMod->first.name << " => " << itmapMod->first.desc << " => " << itmapMod->first.type << endl;
             }
             if(matchedCnt == 1){
                 strToken[0] = matchedIndex->first.name;
                 return true;
             }
-            cout << endl << "recommand list:" << endl;
+            cout << endl << "recommend list:" << endl;
             for (itmapMod=rootmod.begin(); itmapMod!=rootmod.end(); ++itmapMod){
                 if(itmapMod->first.name.substr(0,strToken[0].size()) == strToken[0]){
                     cout << "\t" << itmapMod->first.name << " <= description:" << itmapMod->first.desc << "[" << itmapMod->first.type << "]" << endl;
                 }
             }
-            if(matchedCnt > 0){ remained = strToken[0]; }
+            if(matchedCnt > 0){ 
+                //;; cout << "matchedCount:" << matchedCnt << " ";
+                strToken[0] = findCommonString(matchedString,matchedMinSize);
+                remained = strToken[0]; 
+            }
             return false; 
         }
     }
@@ -211,19 +271,29 @@ verifyLastArgument(vector<string>& strToken,string& remained)
         if(found == 0){ 
             int matchedCnt=0;
             mapApi::iterator matchedIndex;
+            vector<string> matchedString;
+            int matchedMinSize=BUFSIZ;
             for (itmapApi=itmapMod->second.begin(); itmapApi!=itmapMod->second.end(); ++itmapApi){
                 if(itmapApi->first.name.substr(0,strToken[1].size()) == strToken[1]){
                     matchedCnt++;
                     matchedIndex = itmapApi;
-                    cout << "found >1> mapApi first : " << itmapApi->first.name << " => " << itmapApi->first.desc << " => " << itmapApi->first.type << " token[" << strToken[1] << "]" << endl;
+                    matchedString.push_back(itmapApi->first.name);
+                    if(matchedMinSize > itmapApi->first.name.size()){ 
+                        matchedMinSize = itmapApi->first.name.size();
+                    }
+                    //cout << "found >1> mapApi first : " << itmapApi->first.name << " => " << itmapApi->first.desc << " => " << itmapApi->first.type << " token[" << strToken[1] << "]" << endl;
                 }
-                cout << ">1> mapApi first : " << itmapApi->first.name << " => " << itmapApi->first.desc << " => " << itmapApi->first.type << endl;
+                //cout << ">1> mapApi first : " << itmapApi->first.name << " => " << itmapApi->first.desc << " => " << itmapApi->first.type << endl;
             }
             if(matchedCnt == 1){
                 strToken[1] = matchedIndex->first.name;
                 return true;
             }
-            cout << endl << "recommand list:" << endl;
+            if(itmapMod->second.size() == 0){
+                cout << endl << "recommend list: <CR>" << endl;
+            } else {
+                cout << endl << "recommend list:" << endl;
+            }
             for (itmapApi=itmapMod->second.begin(); itmapApi!=itmapMod->second.end(); ++itmapApi){
                 if(itmapApi->first.name.substr(0,strToken[1].size()) == strToken[1]){
                     cout << "\t";
@@ -233,42 +303,50 @@ verifyLastArgument(vector<string>& strToken,string& remained)
                     cout << itmapApi->first.name << " <= description:" << itmapApi->first.desc << "[" << itmapApi->first.type << "]" << endl;
                 }
             }
-            if(matchedCnt > 0){ remained = strToken[1]; }
+            if(matchedCnt > 0){ 
+                //;; cout << "matchedCount:" << matchedCnt << " ";
+                strToken[1] = findCommonString(matchedString,matchedMinSize);
+                remained = strToken[1]; 
+            }
             return false; 
         }
     }
     if(strToken.size() >= 3){
         found = 0;
         if(itmapApi->second.size() < (strToken.size()-2)){
-            cout << endl << "recommand list:" << endl;
-            cout << "\t";
+            cout << endl << "recommend argument : <CR>" << endl;
+            cout << "\tE1> ";
             for(int i=0;i<strToken.size()-1;i++){
                     cout << strToken[i] << " ";
             }
             cout << "<CR>" << endl;
             return false;
         }
-        string remained;
         if(verifyTokenType(strToken[strToken.size()-1],itmapApi->second[strToken.size()-3].type)){
             return true;
         } else {
-            cout << endl << "recommand list:" << endl;
-            cout << "\t";
+            cout << endl << "recommend argument type : ";
+            cout << itmapApi->second[strToken.size()-3].type << "   <= description:" << itmapApi->second[strToken.size()-3].desc << endl;
+            cout << "\tE2> ";
             for(int i=0;i<strToken.size()-1;i++){
                     cout << strToken[i] << " ";
             }
             cout << itmapApi->second[strToken.size()-3].name << "<type:" << itmapApi->second[strToken.size()-3].type << ">" << " <= description:" << itmapApi->second[strToken.size()-3].desc << endl;
             return false;
         }
-        /*
-        for(int i = 2;i<strToken.size() ; i++){
-            cout << "[" << i << "] " << (itmapApi->second)[i-2].name << " => " << itmapApi->second[i-2].type << endl;
-        }
-        */
     }
-            //for (vectorArg::iterator itvectorArg=itmapApi->second.begin(); itvectorArg!=itmapApi->second.end(); ++itvectorArg,++cnt){
 
     return true;
+}
+
+void
+history()
+{
+    cout << endl << "::HISTORY::" << endl;
+    for(int i=0;i<vectorHistory.size();i++){
+        cout << " [" << i << "] " << vectorHistory[i] << endl;
+    }
+    cout << endl;
 }
 
 void
@@ -289,9 +367,11 @@ list()
     cout << endl;
 }
 void
-printPrompt(vector<string>& strToken)
+printPrompt(vector<string>& strToken,const string remained)
 {
-    cout << endl << ">";
+    cout << endl;
+    cout << "[" << strToken.size() << ":" << strToken[strToken.size()-1].size() << "]";
+    cout << "P>";
     mapMod::iterator itmapMod;
     if(strToken.size() >= 1){
         cout << strToken[0] << " ";
@@ -317,12 +397,51 @@ printPrompt(vector<string>& strToken)
             cout << (itmapApi->second)[i-2].name << "<" << itmapApi->second[i-2].type << ">=" << strToken[i] << " ";
         }
     }
+    cout << remained;
 }
 
-void 
+int
+getArgCount(vector<string>& strToken)
+{
+    int ret = 0;
+    mapMod::iterator itmapMod;
+    //;; cout << "{" << strToken.size() << "}";
+    if(strToken.size() >= 1){
+        for (itmapMod=rootmod.begin(); itmapMod!=rootmod.end(); ++itmapMod){
+            if(itmapMod->first.name == strToken[0]){
+                ret++;
+                break;
+            }
+        }
+    }
+    mapApi::iterator itmapApi;
+    if(strToken.size() >= 2){
+        for (itmapApi=itmapMod->second.begin(); itmapApi!=itmapMod->second.end(); ++itmapApi){
+            if(itmapApi->first.name == strToken[1]){
+                ret++;
+                break;
+            }
+        }
+    } else {
+        if(itmapMod->second.size() == 0) return 1;
+        return -1;
+    }
+
+    if(strToken.size() >= 3){
+        for (vectorArg::iterator itvectorArg=itmapApi->second.begin(); itvectorArg!=itmapApi->second.end(); ++itvectorArg){
+            ret++;
+        }
+    } 
+
+    //;; cout << "[r"<<ret<<",t"<<strToken.size()<<"]";;
+    return ret;
+}
+
+int 
 loop(string& s)
 {
     int level = 1;
+    static int cnt = 0;
     mapMod* pmapMod = &rootmod; // level  == 1
     mapApi* pmapApi = NULL; // level  == 2
     vectorArg* pvectorArg = NULL;   // level  is more than 2
@@ -335,27 +454,27 @@ loop(string& s)
     token.clear();
 
     int brkflag=1;
-    cout << ">";
+    cout << cnt++ << ">";
     string remained;
     while (brkflag){
         fread(&c, 1, 1, stdin);
-        if( (prevc == ' ') && (c == ' ') ){ continue; }
+        //if( (prevc == ' ') && (c == ' ') ){ continue; }
+        prevc = c;
         switch(c){
             case '\n':
                 brkflag = 0;
+                if(token.size() > 0){
+                    strToken.push_back(token);
+                }
                 break;
             case '\t':
-                if(token.size() == 0){
-                    token = " ";
-                }
             case ' ':
                 strToken.push_back(token);
                 remained.clear();
                 if(verifyLastArgument(strToken,remained)){
                     token.clear();
-                    s.push_back(c);
                     cout << ' ';
-                    printPrompt(strToken);
+                    printPrompt(strToken,remained);
                 } else {
                     strToken.pop_back();
                     s.clear();
@@ -366,33 +485,45 @@ loop(string& s)
                     }
                     token = remained;
                     s += remained;
-                    cout << ">" << s;
+                    cout << endl << "[" << strToken.size() << ":" << strToken[strToken.size()-1].size() << "]R>";
+                    printPrompt(strToken,remained);
                 }
                 break;
             case '\b':
                 if(token.size() <= 0){ break; } 
                 token.pop_back();
-                s.pop_back();
                 printf("\b");
                 printf(" ");
                 printf("\b");
                 break;
             default :
                 token.push_back(c);
-                s.push_back(c);
                 cout << c;
                 //cout << "{" << c << "}";
         }
-        prevc = c;
     }
 
-    cout << endl << token << endl;
-    if(token == "quit"){ cout << endl << "quit<cr>" << endl; }
-    if(token == "list"){ list(); }
-    if(token == "help"){ list(); }
-    if(token == "history"){ cout << endl << "history<cr>" << endl; }
+    //cout << endl << token << endl;
+    s.clear();
+    for(int i=0;i<strToken.size();i++){
+        s += strToken[i];
+        s += ' ';
+    }
+    string hs;
+    if(getArgCount(strToken) == strToken.size()){
+        hs = "> " + s;
+    } else {
+        hs = "! " + s;
+    }
 
-    return ;
+    if(strToken[0] == "quit"){ cout << endl << "quit<cr>" << endl; return 0; }
+    if(strToken[0] == "list"){ list(); }
+    if(strToken[0] == "help"){ list(); }
+    if(strToken[0] == "history"){ history(); }
+
+    vectorHistory.push_back(hs);
+
+    return 1;
 }
 
 int 
@@ -418,9 +549,13 @@ main()
     new_tio.c_lflag &= ~(ECHO | ECHOE | ICANON);
     tcsetattr(STDIN_FILENO, TCSANOW, &new_tio);
 
-    while(1){
+    int ct=1;
+    while(ct){
         string s;
-        loop(s);
-        cout << "\nCommand:" << s << endl;
+        ct = loop(s);
+        cout << endl << endl;
+        cout <<"Command:" << command << " [" << s << "]" << endl << endl;
     }
+
+    tcsetattr(STDIN_FILENO, TCSANOW, &old_tio);
 }
