@@ -4,35 +4,10 @@
 
 #include <termios.h>
 #include <unistd.h>
+#include <string.h>
 
 using namespace std;
 
-
-/*
-map<string ,    // modulename 
-    map<string,  // api function name 
-        vector<pair<string,int>>     // argument name , argument type
-    >
->;
-*/
-using argumentVector = vector<pair<string,int>>;
-using apiMap = map<string , argumentVector >;
-using moduleMap = map<string , apiMap >;
-
-moduleMap rootMap = {       // initialize
-    {       // moduleMap map
-        "A" ,      // string : module name
-        {       // apiMap map
-            {   // first element of apiMap map
-                "func1" ,  // api function
-                {   // argumentVector vector
-                    { "argname", 1 }, // argument 1
-                    { "arg100", 2 }, // argument 2
-                }
-            },
-        },
-    },
-};
 
 enum class ArgumentType {
     None,
@@ -68,107 +43,62 @@ public:
     }
 };
 
-using argV = vector<Argument>;
-using apiM = map<string , argV >;
-using moduleM = map<string , apiM >;
+using vectorArg = vector<Argument>;
+using mapApi = map<Argument,vectorArg>;
+using mapMod = map<Argument, mapApi >;
+
 
 /*
-map<string ,    // modulename 
-    map<string,  // api function name 
-        vector<class <string,string,enum>>     // argument name , argument type
-    >
->;
-*/
-moduleM rootVariant = {       // initialize
-    {       // moduleM map
-        "A" ,      // string : module name
-        {       // apiM map
-            {   // first element of apiM map
-                "func1" ,  // api function
-                {   // argV vector
-                    { "name-string", "description string for A" , ArgumentType::String}, // argument 1
-                    { "name-int", "description integer for A" , ArgumentType::Int}, // argument 2
-                    { "name-hexa", "description hexa for A" , ArgumentType::Hex}, // argument 3
-                }
-            },
-        },
-    },
-};
-
-struct Comparator {
-public:
-    bool operator()(const Argument& c1, const Argument& c2){
-        return c1.name < c2.name ;
-    }
-};
-
-struct AAA {
-public:
-    string name;
-    string desc;
-    ArgumentType type;
-    AAA(string n , string d, ArgumentType t) : name(n),desc(d),type(t){}
-    ~AAA() {}
-    bool operator< (const AAA& userObj) const
-    {
-        return userObj.name < this->name;
-    }
-};
-
-using testArg = vector<AAA>;
-using testApi = map<AAA,testArg>;
-using testMod = map<AAA, testApi >;
-
-
-testArg testarg = {
+vectorArg testarg = {
                     { "name-string", "description string for A" , ArgumentType::String}, // argument 1
                     { "name-int", "description integer for A" , ArgumentType::Int}, // argument 2
                     { "name-hexa", "description hexa for A" , ArgumentType::Hex}, // argument 3
 };
 
-testApi testapi = {
-    { // testApi map
-        {"wifi" , "wifi is our first module" , ArgumentType::None }, // AAA
-        {   // vector<AAA> = testArg
+mapApi testapi = {
+    { // mapApi map
+        {"wifi" , "wifi is our first module" , ArgumentType::None }, // Argument
+        {   // vector<Argument> = vectorArg
             { "name-string", "description string for A" , ArgumentType::String}, // argument 1
             { "name-int", "description integer for A" , ArgumentType::Int}, // argument 2
             { "name-hexa", "description hexa for A" , ArgumentType::Hex}, // argument 3
         }
     },
 };
+*/
 
-testMod testmod = {       // testMod
-    {       // testMod map <AAA,testApi>
-        {"wifi" , "wifi is our first module" , ArgumentType::None }, // AAA
-        {   // testApi
-            { // testApi map
-                {"wifi-api1" , "wifi-api1 is our first module" , ArgumentType::None }, // AAA
-                {   // testArg
+mapMod rootmod = {       // mapMod
+    {       // mapMod map <Argument,mapApi>
+        {"wifi" , "wifi is our first module" , ArgumentType::None }, // Argument
+        {   // mapApi
+            { // mapApi map
+                {"wifi-api1" , "wifi-api1 is our first module" , ArgumentType::None }, // Argument
+                {   // vectorArg
                     { "name-string", "description string for A" , ArgumentType::String}, // argument 1
                     { "name-int", "description integer for A" , ArgumentType::Int}, // argument 2
                     { "name-hexa", "description hexa for A" , ArgumentType::Hex}, // argument 3
                 }
             },
-            { // testApi map
-                {"wifi-api2" , "wifi-api2 is our first module" , ArgumentType::None }, // AAA
-                {   // testArg
+            { // mapApi map
+                {"api-api2" , "wifi-api2 is our first module" , ArgumentType::None }, // Argument
+                {   // vectorArg
                     { "name-string", "description string for A" , ArgumentType::String}, // argument 1
                     { "name-hexa", "description hexa for A" , ArgumentType::Hex}, // argument 2
                 }
             },
-            { // testApi map
-                {"wifi-api3" , "wifi-api3 is our first module" , ArgumentType::None }, // AAA
-                {   // testArg
+            { // mapApi map
+                {"wifi-api3" , "wifi-api3 is our first module" , ArgumentType::None }, // Argument
+                {   // vectorArg
                 }
             },
         }
     },
-    {       // testMod map <AAA,testApi>
-        {"dongle" , "dongle is our first module" , ArgumentType::None }, // AAA
-        {   // testApi
-            { // testApi map
-                {"dongle-api" , "dongle-api is our first module" , ArgumentType::None }, // AAA
-                {   // testArg
+    {       // mapMod map <Argument,mapApi>
+        {"dongle" , "dongle is our first module" , ArgumentType::None }, // Argument
+        {   // mapApi
+            { // mapApi map
+                {"dongle-api" , "dongle-api is our first module" , ArgumentType::None }, // Argument
+                {   // vectorArg
                     { "dongle-string", "description string for A" , ArgumentType::String}, // argument 1
                     { "dongle-int", "description integer for A" , ArgumentType::Int}, // argument 2
                     { "dongle-hexa", "description hexa for A" , ArgumentType::Hex}, // argument 3
@@ -180,48 +110,306 @@ testMod testmod = {       // testMod
     },
 };
 
+
+Argument* 
+getArgument(const int level , const string token,const mapMod* pmapMod,const mapApi* pmapApi,const vectorArg* pvectorArg)
+{
+}
+
+bool
+verifyTokenType(const string& s,const ArgumentType& t)
+{
+    bool ret = true;
+    switch(t){
+        case ArgumentType::None: 
+            return true;
+        case ArgumentType::String: 
+            return true;
+        case ArgumentType::Int: 
+            for(int i=0;i<s.size();i++){
+                if( ('0' <= s[i]) && (s[i] <= '9') ){ continue; }
+                ret = false;
+                break;
+            }
+            return ret;
+        case ArgumentType::Hex: 
+            for(int i=0;i<s.size();i++){
+                if( ('0' <= s[i]) && (s[i] <= '9') ){ continue; }
+                if( ('a' <= s[i]) && (s[i] <= 'f') ){ continue; }
+                if( ('A' <= s[i]) && (s[i] <= 'F') ){ continue; }
+                ret = false;
+                break;
+            }
+            return ret;
+        case ArgumentType::Ip: 
+            for(int i=0;i<s.size();i++){
+                if( ('0' <= s[i]) && (s[i] <= '9') ){ continue; }
+                if('.' == s[i]){ continue; }
+                ret = false;
+                break;
+            }
+            return ret;
+    }
+    return false;
+}
+
+bool
+verifyLastArgument(vector<string>& strToken,string& remained)
+{
+    int found = 0;
+    if(strToken.size() <= 0){
+        return false;
+    } 
+
+    mapMod::iterator itmapMod;
+    if(strToken.size() >= 1){
+        found = 0;
+        for (itmapMod=rootmod.begin(); itmapMod!=rootmod.end(); ++itmapMod){
+            if(itmapMod->first.name == strToken[0]){
+                found = 1;
+                //cout << "found >> mapMod first : " << itmapMod->first.name << " => " << itmapMod->first.desc << " => " << itmapMod->first.type << endl;
+                break;
+            }
+            //cout << ">> mapMod first : " << itmapMod->first.name << " => " << itmapMod->first.desc << " => " << itmapMod->first.type << endl;
+        }
+        if(found == 0){ 
+            int matchedCnt=0;
+            mapMod::iterator matchedIndex;
+            for (itmapMod=rootmod.begin(); itmapMod!=rootmod.end(); ++itmapMod){
+                if(itmapMod->first.name.substr(0,strToken[0].size()) == strToken[0]){
+                    matchedCnt++;
+                    matchedIndex = itmapMod;
+                    cout << "found >1> mapMod first : " << itmapMod->first.name << " => " << itmapMod->first.desc << " => " << itmapMod->first.type << " token[" << strToken[0] << "]" << endl;
+                }
+                cout << ">1> mapMod first : " << itmapMod->first.name << " => " << itmapMod->first.desc << " => " << itmapMod->first.type << endl;
+            }
+            if(matchedCnt == 1){
+                strToken[0] = matchedIndex->first.name;
+                return true;
+            }
+            cout << endl << "recommand list:" << endl;
+            for (itmapMod=rootmod.begin(); itmapMod!=rootmod.end(); ++itmapMod){
+                if(itmapMod->first.name.substr(0,strToken[0].size()) == strToken[0]){
+                    cout << "\t" << itmapMod->first.name << " <= description:" << itmapMod->first.desc << "[" << itmapMod->first.type << "]" << endl;
+                }
+            }
+            if(matchedCnt > 0){ remained = strToken[0]; }
+            return false; 
+        }
+    }
+    mapApi::iterator itmapApi;
+    if(strToken.size() >= 2){
+        found = 0;
+        for (itmapApi=itmapMod->second.begin(); itmapApi!=itmapMod->second.end(); ++itmapApi){
+            if(itmapApi->first.name == strToken[1]){
+                found = 1;
+                //cout << "found >> mapApi first : " << itmapApi->first.name << " => " << itmapApi->first.desc << " => " << itmapApi->first.type << endl;
+                break;
+            }
+            //cout << "\t>>mapApi first : " << itmapApi->first.name << " => " << itmapApi->first.desc << " => " << itmapApi->first.type << endl;
+        }
+        if(found == 0){ 
+            int matchedCnt=0;
+            mapApi::iterator matchedIndex;
+            for (itmapApi=itmapMod->second.begin(); itmapApi!=itmapMod->second.end(); ++itmapApi){
+                if(itmapApi->first.name.substr(0,strToken[1].size()) == strToken[1]){
+                    matchedCnt++;
+                    matchedIndex = itmapApi;
+                    cout << "found >1> mapApi first : " << itmapApi->first.name << " => " << itmapApi->first.desc << " => " << itmapApi->first.type << " token[" << strToken[1] << "]" << endl;
+                }
+                cout << ">1> mapApi first : " << itmapApi->first.name << " => " << itmapApi->first.desc << " => " << itmapApi->first.type << endl;
+            }
+            if(matchedCnt == 1){
+                strToken[1] = matchedIndex->first.name;
+                return true;
+            }
+            cout << endl << "recommand list:" << endl;
+            for (itmapApi=itmapMod->second.begin(); itmapApi!=itmapMod->second.end(); ++itmapApi){
+                if(itmapApi->first.name.substr(0,strToken[1].size()) == strToken[1]){
+                    cout << "\t";
+                    for(int i=0;i<1;i++){
+                        cout << strToken[i] << " ";
+                    }
+                    cout << itmapApi->first.name << " <= description:" << itmapApi->first.desc << "[" << itmapApi->first.type << "]" << endl;
+                }
+            }
+            if(matchedCnt > 0){ remained = strToken[1]; }
+            return false; 
+        }
+    }
+    if(strToken.size() >= 3){
+        found = 0;
+        if(itmapApi->second.size() < (strToken.size()-2)){
+            cout << endl << "recommand list:" << endl;
+            cout << "\t";
+            for(int i=0;i<strToken.size()-1;i++){
+                    cout << strToken[i] << " ";
+            }
+            cout << "<CR>" << endl;
+            return false;
+        }
+        string remained;
+        if(verifyTokenType(strToken[strToken.size()-1],itmapApi->second[strToken.size()-3].type)){
+            return true;
+        } else {
+            cout << endl << "recommand list:" << endl;
+            cout << "\t";
+            for(int i=0;i<strToken.size()-1;i++){
+                    cout << strToken[i] << " ";
+            }
+            cout << itmapApi->second[strToken.size()-3].name << "<type:" << itmapApi->second[strToken.size()-3].type << ">" << " <= description:" << itmapApi->second[strToken.size()-3].desc << endl;
+            return false;
+        }
+        /*
+        for(int i = 2;i<strToken.size() ; i++){
+            cout << "[" << i << "] " << (itmapApi->second)[i-2].name << " => " << itmapApi->second[i-2].type << endl;
+        }
+        */
+    }
+            //for (vectorArg::iterator itvectorArg=itmapApi->second.begin(); itvectorArg!=itmapApi->second.end(); ++itvectorArg,++cnt){
+
+    return true;
+}
+
+void
+list()
+{
+    cout << endl << "::LIST::" << endl;
+    for (mapMod::iterator itmapMod=rootmod.begin(); itmapMod!=rootmod.end(); ++itmapMod){
+        cout << "Module Name : " << itmapMod->first.name << " <= description : " << itmapMod->first.desc << endl;
+        for (mapApi::iterator itmapApi=itmapMod->second.begin(); itmapApi!=itmapMod->second.end(); ++itmapApi){
+            cout << "> " << itmapMod->first.name << " " << itmapApi->first.name << " ";
+            for (vectorArg::iterator itvectorArg=itmapApi->second.begin(); itvectorArg!=itmapApi->second.end(); ++itvectorArg){
+                cout << itvectorArg->name << "<" << itvectorArg->type << "> ";
+            }
+            cout << endl;
+            cout << "\tAPI description : " << itmapApi->first.desc << endl;
+        }
+    }
+    cout << endl;
+}
+void
+printPrompt(vector<string>& strToken)
+{
+    cout << endl << ">";
+    mapMod::iterator itmapMod;
+    if(strToken.size() >= 1){
+        cout << strToken[0] << " ";
+        for (itmapMod=rootmod.begin(); itmapMod!=rootmod.end(); ++itmapMod){
+            if(itmapMod->first.name == strToken[0]){
+                //found = 1;
+                break;
+            }
+        }
+    }
+    mapApi::iterator itmapApi;
+    if(strToken.size() >= 2){
+        cout << strToken[1] << " ";
+        for (itmapApi=itmapMod->second.begin(); itmapApi!=itmapMod->second.end(); ++itmapApi){
+            if(itmapApi->first.name == strToken[1]){
+                //found = 1;
+                break;
+            }
+        }
+    }
+    if(strToken.size() >= 3){
+        for(int i = 2;i<strToken.size() ; i++){
+            cout << (itmapApi->second)[i-2].name << "<" << itmapApi->second[i-2].type << ">=" << strToken[i] << " ";
+        }
+    }
+}
+
+void 
+loop(string& s)
+{
+    int level = 1;
+    mapMod* pmapMod = &rootmod; // level  == 1
+    mapApi* pmapApi = NULL; // level  == 2
+    vectorArg* pvectorArg = NULL;   // level  is more than 2
+    char c=0,prevc=0;
+    string token;
+    vector<string> strToken;
+
+    //for(int i = 0;i<BUFSIZ;i++){ str[i] = 0; token[i]=0; }
+    s.clear();
+    token.clear();
+
+    int brkflag=1;
+    cout << ">";
+    string remained;
+    while (brkflag){
+        fread(&c, 1, 1, stdin);
+        if( (prevc == ' ') && (c == ' ') ){ continue; }
+        switch(c){
+            case '\n':
+                brkflag = 0;
+                break;
+            case '\t':
+                if(token.size() == 0){
+                    token = " ";
+                }
+            case ' ':
+                strToken.push_back(token);
+                remained.clear();
+                if(verifyLastArgument(strToken,remained)){
+                    token.clear();
+                    s.push_back(c);
+                    cout << ' ';
+                    printPrompt(strToken);
+                } else {
+                    strToken.pop_back();
+                    s.clear();
+                    cout << endl;
+                    for(int i=0;i<strToken.size();i++){
+                        s += strToken[i];
+                        s += ' ';
+                    }
+                    token = remained;
+                    s += remained;
+                    cout << ">" << s;
+                }
+                break;
+            case '\b':
+                if(token.size() <= 0){ break; } 
+                token.pop_back();
+                s.pop_back();
+                printf("\b");
+                printf(" ");
+                printf("\b");
+                break;
+            default :
+                token.push_back(c);
+                s.push_back(c);
+                cout << c;
+                //cout << "{" << c << "}";
+        }
+        prevc = c;
+    }
+
+    cout << endl << token << endl;
+    if(token == "quit"){ cout << endl << "quit<cr>" << endl; }
+    if(token == "list"){ list(); }
+    if(token == "help"){ list(); }
+    if(token == "history"){ cout << endl << "history<cr>" << endl; }
+
+    return ;
+}
+
 int 
 main()
 {
-    for (moduleMap::iterator itmoduleMap=rootMap.begin(); itmoduleMap!=rootMap.end(); ++itmoduleMap){
-        cout << "moduleMap first : " << itmoduleMap->first << " => " << '\n';
-        for (apiMap::iterator itapiMap=itmoduleMap->second.begin(); itapiMap!=itmoduleMap->second.end(); ++itapiMap){
-            cout << "\tapiMap first : " << itapiMap->first << " => " << '\n';
-            for (argumentVector::iterator itargumentVector=itapiMap->second.begin(); itargumentVector!=itapiMap->second.end(); ++itargumentVector){
-                cout << "\t\targumentVector first : " << itargumentVector->first << " => " << itargumentVector->second << '\n';
-            }
-        }
-    }
-    cout << endl;
 
-    for (moduleM::iterator itmoduleM=rootVariant.begin(); itmoduleM!=rootVariant.end(); ++itmoduleM){
-        cout << "moduleM first : " << itmoduleM->first << " => " << '\n';
-        for (apiM::iterator itapiM=itmoduleM->second.begin(); itapiM!=itmoduleM->second.end(); ++itapiM){
-            cout << "\tapiM first : " << itapiM->first << " => " << '\n';
-            for (argV::iterator itargV=itapiM->second.begin(); itargV!=itapiM->second.end(); ++itargV){
-                // cout << "\t\targV desc : " << itargV->name << " => " << static_cast<int>(itargV->type) << " => " << itargV->desc << '\n';
-                cout << "\t\targV desc : " << itargV->name << " => " << itargV->type << " => " << itargV->desc << '\n';
-            }
-        }
-    }
-    cout << endl;
-
-    for (testMod::iterator ittestMod=testmod.begin(); ittestMod!=testmod.end(); ++ittestMod){
-        cout << "testMod first : " << ittestMod->first.name << " => " << ittestMod->first.desc << " => " << ittestMod->first.type << endl;
-        for (testApi::iterator ittestApi=ittestMod->second.begin(); ittestApi!=ittestMod->second.end(); ++ittestApi){
-            cout << "\ttestApi first : " << ittestApi->first.name << " => " << ittestApi->first.desc << " => " << ittestApi->first.type << endl;
+    for (mapMod::iterator itmapMod=rootmod.begin(); itmapMod!=rootmod.end(); ++itmapMod){
+        cout << "mapMod first : " << itmapMod->first.name << " => " << itmapMod->first.desc << " => " << itmapMod->first.type << endl;
+        for (mapApi::iterator itmapApi=itmapMod->second.begin(); itmapApi!=itmapMod->second.end(); ++itmapApi){
+            cout << "\tmapApi first : " << itmapApi->first.name << " => " << itmapApi->first.desc << " => " << itmapApi->first.type << endl;
             int cnt = 1;
-            for (testArg::iterator ittestArg=ittestApi->second.begin(); ittestArg!=ittestApi->second.end(); ++ittestArg,++cnt){
-                cout << "\t\tArg[" << cnt << "] testArg desc : " << ittestArg->name << " => " << ittestArg->type << " => " << ittestArg->desc << endl;
+            for (vectorArg::iterator itvectorArg=itmapApi->second.begin(); itvectorArg!=itmapApi->second.end(); ++itvectorArg,++cnt){
+                cout << "\t\tArg[" << cnt << "] vectorArg desc : " << itvectorArg->name << " => " << itvectorArg->type << " => " << itvectorArg->desc << endl;
             }
         }
     }
     cout << endl;
-
-
-
-
-
 
 
     struct termios old_tio, new_tio;
@@ -229,23 +417,10 @@ main()
     new_tio = old_tio;
     new_tio.c_lflag &= ~(ECHO | ECHOE | ICANON);
     tcsetattr(STDIN_FILENO, TCSANOW, &new_tio);
-    char c;
-    while (fread(&c, 1, 1, stdin)){
-        switch(c){
-            case '\t':
-                std::cout << "tab"  << std::endl;
-                break;
-            case '\b':
-                printf("\b");
-                printf(" ");
-                printf("\b");
-                // std::cout << "backspace" << std::endl;
-                break;
-            default :
-                cout << c;
-        }
+
+    while(1){
+        string s;
+        loop(s);
+        cout << "\nCommand:" << s << endl;
     }
-
-    return 0;
 }
-
