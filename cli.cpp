@@ -589,7 +589,8 @@ main()
         string s;
         ct = loop(s);
         cout << endl << endl;
-        cout <<"Command:" << command << " [" << s << "]" << endl << endl;
+        //cout <<"Command:" << command << " [" << s << "]" << endl << endl;
+        cout <<"Command:" << command << " " << s << endl << endl;
     }
 
     tcsetattr(STDIN_FILENO, TCSANOW, &old_tio);
