@@ -73,6 +73,13 @@ string command = "sldd";
 
 mapMod rootmod = {       // mapMod
     {       // mapMod map <Argument,mapApi>
+        {"version" , "version" , ArgumentType::None }, // Argument
+        {   // mapApi
+            { // mapApi map
+            },
+        }
+    },
+    {       // mapMod map <Argument,mapApi>
         {"quit" , "quit program" , ArgumentType::None }, // Argument
         {   // mapApi
             { // mapApi map
@@ -362,6 +369,12 @@ history()
 }
 
 void
+version()
+{
+    cout << endl << "version 1.0" << endl;
+}
+
+void
 list()
 {
     cout << endl << "::LIST::" << endl;
@@ -378,6 +391,7 @@ list()
     }
     cout << endl;
 }
+
 void
 printPrompt(vector<string>& strToken,const string remained)
 {
@@ -554,6 +568,7 @@ loop(string& s)
     if(strToken[0] == "quit"){ cout << endl << "quit<cr>" << endl; return 0; }
     if(strToken[0] == "list"){ list(); }
     if(strToken[0] == "help"){ list(); }
+    if(strToken[0] == "version"){ version(); }
     if(strToken[0] == "history"){ history(); }
 
     vectorHistory.push_back(hs);
