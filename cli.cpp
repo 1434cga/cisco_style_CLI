@@ -290,9 +290,9 @@ verifyLastArgument(vector<string>& strToken,string& remained)
                 return true;
             }
             if(itmapMod->second.size() == 0){
-                cout << endl << "recommend list: <CR>" << endl;
+                cout << endl << "recommend : <CR>" << endl;
             } else {
-                cout << endl << "recommend list:" << endl;
+                cout << endl << "recommend LIST:" << endl;
             }
             for (itmapApi=itmapMod->second.begin(); itmapApi!=itmapMod->second.end(); ++itmapApi){
                 if(itmapApi->first.name.substr(0,strToken[1].size()) == strToken[1]){
@@ -301,6 +301,15 @@ verifyLastArgument(vector<string>& strToken,string& remained)
                         cout << strToken[i] << " ";
                     }
                     cout << itmapApi->first.name << " <= description:" << itmapApi->first.desc << "[" << itmapApi->first.type << "]" << endl;
+                    cout << "\t\tex>";
+                    for(int i=0;i<1;i++){
+                        cout << strToken[i] << " ";
+                    }
+                    cout << itmapApi->first.name << " ";
+                    for (vectorArg::iterator itvectorArg=itmapApi->second.begin(); itvectorArg!=itmapApi->second.end(); ++itvectorArg){
+                        cout << itvectorArg->name << "<" << itvectorArg->type << "> ";
+                    }
+                    cout << "<CR>" << endl;
                 }
             }
             if(matchedCnt > 0){ 
@@ -331,7 +340,10 @@ verifyLastArgument(vector<string>& strToken,string& remained)
             for(int i=0;i<strToken.size()-1;i++){
                     cout << strToken[i] << " ";
             }
-            cout << itmapApi->second[strToken.size()-3].name << "<type:" << itmapApi->second[strToken.size()-3].type << ">" << " <= description:" << itmapApi->second[strToken.size()-3].desc << endl;
+            for (int i=strToken.size()-3;i<itmapApi->second.size();i++){
+                cout << itmapApi->second[i].name << "<type:" << itmapApi->second[i].type << "> ";
+            }
+            cout << "<CR>" << endl;
             return false;
         }
     }
@@ -354,14 +366,14 @@ list()
 {
     cout << endl << "::LIST::" << endl;
     for (mapMod::iterator itmapMod=rootmod.begin(); itmapMod!=rootmod.end(); ++itmapMod){
-        cout << "Module Name : " << itmapMod->first.name << " <= description : " << itmapMod->first.desc << endl;
+        cout << "- " << itmapMod->first.name << " <= description : " << itmapMod->first.desc << endl;
         for (mapApi::iterator itmapApi=itmapMod->second.begin(); itmapApi!=itmapMod->second.end(); ++itmapApi){
-            cout << "> " << itmapMod->first.name << " " << itmapApi->first.name << " ";
+            cout << "\texample> " << itmapMod->first.name << " " << itmapApi->first.name << " ";
             for (vectorArg::iterator itvectorArg=itmapApi->second.begin(); itvectorArg!=itmapApi->second.end(); ++itvectorArg){
                 cout << itvectorArg->name << "<" << itvectorArg->type << "> ";
             }
             cout << endl;
-            cout << "\tAPI description : " << itmapApi->first.desc << endl;
+            cout << "\t\t\tAPI description : " << itmapApi->first.desc << endl;
         }
     }
     cout << endl;
@@ -370,10 +382,16 @@ void
 printPrompt(vector<string>& strToken,const string remained)
 {
     cout << endl;
-    cout << "[" << strToken.size() << ":" << strToken[strToken.size()-1].size() << "]";
-    cout << "P>";
+
+    string prompt;
+    int hasArgFlag = 0;
+
+    prompt +=  "[" + to_string(strToken.size()) + ":" + to_string(strToken[strToken.size()-1].size()) + "]" + "P>";
+    cout << prompt;
+
     mapMod::iterator itmapMod;
     if(strToken.size() >= 1){
+        prompt += strToken[0] + " ";
         cout << strToken[0] << " ";
         for (itmapMod=rootmod.begin(); itmapMod!=rootmod.end(); ++itmapMod){
             if(itmapMod->first.name == strToken[0]){
@@ -384,6 +402,7 @@ printPrompt(vector<string>& strToken,const string remained)
     }
     mapApi::iterator itmapApi;
     if(strToken.size() >= 2){
+        prompt += strToken[1] + " ";
         cout << strToken[1] << " ";
         for (itmapApi=itmapMod->second.begin(); itmapApi!=itmapMod->second.end(); ++itmapApi){
             if(itmapApi->first.name == strToken[1]){
@@ -393,8 +412,14 @@ printPrompt(vector<string>& strToken,const string remained)
         }
     }
     if(strToken.size() >= 3){
+        hasArgFlag = 1;
         for(int i = 2;i<strToken.size() ; i++){
             cout << (itmapApi->second)[i-2].name << "<" << itmapApi->second[i-2].type << ">=" << strToken[i] << " ";
+        }
+        cout << endl;
+        cout << prompt;
+        for(int i = 2;i<strToken.size() ; i++){
+            cout << strToken[i] << " ";
         }
     }
     cout << remained;
@@ -485,12 +510,21 @@ loop(string& s)
                     }
                     token = remained;
                     s += remained;
-                    cout << endl << "[" << strToken.size() << ":" << strToken[strToken.size()-1].size() << "]R>";
+                    //;;; cout << endl << "[" << strToken.size() << ":" << strToken[strToken.size()-1].size() << "]R>";
                     printPrompt(strToken,remained);
                 }
                 break;
+            case '~':
             case '\b':
-                if(token.size() <= 0){ break; } 
+                if(token.size() <= 0){ 
+                    if(strToken.size() <= 0){  break; }
+                    token = strToken.back();
+                    strToken.pop_back();
+                    printf("\b");
+                    printf(" ");
+                    printf("\b");
+                    break; 
+                } 
                 token.pop_back();
                 printf("\b");
                 printf(" ");
@@ -500,6 +534,7 @@ loop(string& s)
                 token.push_back(c);
                 cout << c;
                 //cout << "{" << c << "}";
+                break;
         }
     }
 
