@@ -10,10 +10,13 @@
 using namespace std;
 
 
+
+
 enum class ArgumentType {
     None,
     String,
     Int,
+    Uint,
     Hex,
     Ip,
 };
@@ -25,8 +28,24 @@ std::ostream& operator << (std::ostream& os, const ArgumentType &at)
         case ArgumentType::None: os << "None"; break;
         case ArgumentType::String: os << "String"; break;
         case ArgumentType::Int: os << "Int"; break;
+        case ArgumentType::Uint: os << "Uint"; break;
         case ArgumentType::Hex: os << "Hex"; break;
         case ArgumentType::Ip: os << "Ip"; break;
+    }
+    return os;
+}
+
+enum class ModeType {
+    Normal,
+    Privileged,
+};
+
+std::ostream& operator << (std::ostream& os, const ModeType &at)
+{
+    switch(at)
+    {
+        case ModeType::Normal: os << "Normal"; break;
+        case ModeType::Privileged: os << "Privileged"; break;
     }
     return os;
 }
@@ -36,7 +55,8 @@ public:
     string name;
     string desc;
     ArgumentType type;
-    Argument(string n , string d, ArgumentType t) : name(n),desc(d),type(t){}
+    ModeType mode;
+    Argument(string n , string d, ArgumentType t,ModeType m) : name(n),desc(d),type(t),mode(m){}
     Argument(){}
     ~Argument() {}
     bool operator< (const Argument& userObj) const
@@ -44,6 +64,10 @@ public:
         return userObj.name > this->name;
     }
 };
+
+#define PASSWORD "root"
+string command = "sldd";
+ModeType mode = ModeType::Normal;
 
 using vectorArg = vector<Argument>;
 using mapApi = map<Argument,vectorArg>;
@@ -70,80 +94,91 @@ mapApi testapi = {
 };
 */
 
-string command = "sldd";
 
 mapMod rootmod = {       // mapMod
     {       // mapMod map <Argument,mapApi>
-        {"version" , "version" , ArgumentType::None }, // Argument
+        {"version" , "version" , ArgumentType::None , ModeType::Normal }, // Argument
         {   // mapApi
             { // mapApi map
             },
         }
     },
     {       // mapMod map <Argument,mapApi>
-        {"quit" , "quit program" , ArgumentType::None }, // Argument
+        {"quit" , "quit program" , ArgumentType::None , ModeType::Normal }, // Argument
         {   // mapApi
             { // mapApi map
             },
         }
     },
     {       // mapMod map <Argument,mapApi>
-        {"list" , "show all command lists" , ArgumentType::None }, // Argument
+        {"list" , "show all command lists" , ArgumentType::None , ModeType::Normal }, // Argument
         {   // mapApi
             { // mapApi map
             },
         }
     },
     {       // mapMod map <Argument,mapApi>
-        {"help" , "show all command lists" , ArgumentType::None }, // Argument
+        {"help" , "show all command lists" , ArgumentType::None , ModeType::Normal }, // Argument
         {   // mapApi
             { // mapApi map
             },
         }
     },
     {       // mapMod map <Argument,mapApi>
-        {"history" , "history" , ArgumentType::None }, // Argument
+        {"history" , "history" , ArgumentType::None , ModeType::Normal }, // Argument
         {   // mapApi
             { // mapApi map
             },
         }
     },
     {       // mapMod map <Argument,mapApi>
-        {"wifi" , "wifi is our first module" , ArgumentType::None }, // Argument
+        {"testwifi" , "wifi is our first module" , ArgumentType::None , ModeType::Normal }, // Argument
         {   // mapApi
             { // mapApi map
-                {"wifi-api1" , "wifi-api1 is our first module" , ArgumentType::None }, // Argument
+                {"wifi-api1" , "wifi-api1 is our first module" , ArgumentType::None , ModeType::Normal }, // Argument
                 {   // vectorArg
-                    { "name-string", "description string for A" , ArgumentType::String}, // argument 1
-                    { "name-int", "description integer for A" , ArgumentType::Int}, // argument 2
-                    { "name-hexa", "description hexa for A" , ArgumentType::Hex}, // argument 3
+                    { "name-string", "description string for A" , ArgumentType::String, ModeType::Normal }, // argument 1
+                    { "name-int", "description integer for A" , ArgumentType::Int, ModeType::Normal }, // argument 2
+                    { "name-hexa", "description hexa for A" , ArgumentType::Hex, ModeType::Normal }, // argument 3
                 }
             },
             { // mapApi map
-                {"wapi-api2" , "wifi-api2 is our first module" , ArgumentType::None }, // Argument
+                {"api-privileged" , "wifi-api2 is our first module" , ArgumentType::None , ModeType::Privileged }, // Argument
                 {   // vectorArg
-                    { "name-string", "description string for A" , ArgumentType::String}, // argument 1
-                    { "name-hexa", "description hexa for A" , ArgumentType::Hex}, // argument 2
+                    { "name-string", "description string for A" , ArgumentType::String, ModeType::Normal }, // argument 1
+                    { "name-hexa", "description hexa for A" , ArgumentType::Hex, ModeType::Normal }, // argument 2
                 }
             },
             { // mapApi map
-                {"wifi-api3" , "wifi-api3 is our first module" , ArgumentType::None }, // Argument
+                {"wapi-api2" , "wifi-api2 is our first module" , ArgumentType::None , ModeType::Privileged }, // Argument
+                {   // vectorArg
+                    { "name-string", "description string for A" , ArgumentType::String, ModeType::Normal }, // argument 1
+                    { "name-hexa", "description hexa for A" , ArgumentType::Hex, ModeType::Normal }, // argument 2
+                }
+            },
+            { // mapApi map
+                {"wifi-api3" , "wifi-api3 is our first module" , ArgumentType::None , ModeType::Normal }, // Argument
+                {   // vectorArg
+                }
+            },
+            { // mapApi map
+                {"wifi-api4" , "wifi-api4 is our first module" , ArgumentType::None , ModeType::Privileged }, // Argument
                 {   // vectorArg
                 }
             },
         }
     },
     {       // mapMod map <Argument,mapApi>
-        {"dongle" , "dongle is our first module" , ArgumentType::None }, // Argument
+        {"testdongle" , "dongle is our first module" , ArgumentType::None , ModeType::Normal }, // Argument
         {   // mapApi
             { // mapApi map
-                {"dongle-api" , "dongle-api is our first module" , ArgumentType::None }, // Argument
+                {"dongle-api" , "dongle-api is our first module" , ArgumentType::None , ModeType::Normal }, // Argument
                 {   // vectorArg
-                    { "dongle-string", "description string for A" , ArgumentType::String}, // argument 1
-                    { "dongle-int", "description integer for A" , ArgumentType::Int}, // argument 2
-                    { "dongle-hexa", "description hexa for A" , ArgumentType::Hex}, // argument 3
-                    { "dongle-hexa", "description hexa for A" , ArgumentType::Hex}, // argument 3
-                    { "dongle-int", "description integer for A" , ArgumentType::Int}, // argument 5
+                    { "dongle-string", "description string for A" , ArgumentType::String, ModeType::Normal }, // argument 1
+                    { "dongle-int", "description integer for A" , ArgumentType::Int, ModeType::Normal }, // argument 2
+                    { "dongle-hexa", "description hexa for A" , ArgumentType::Hex, ModeType::Normal }, // argument 3
+                    { "dongle-hexa", "description hexa for A" , ArgumentType::Hex, ModeType::Normal }, // argument 3
+                    { "dongle-int", "description integer for A" , ArgumentType::Int, ModeType::Normal }, // argument 5
                 }
             },
         }
@@ -162,6 +197,14 @@ verifyTokenType(const string& s,const ArgumentType& t)
         case ArgumentType::String: 
             return true;
         case ArgumentType::Int: 
+            for(int i=0;i<s.size();i++){
+                if( ('0' <= s[i]) && (s[i] <= '9') ){ continue; }
+                if('-' == s[i]){ continue; }
+                ret = false;
+                break;
+            }
+            return ret;
+        case ArgumentType::Uint: 
             for(int i=0;i<s.size();i++){
                 if( ('0' <= s[i]) && (s[i] <= '9') ){ continue; }
                 ret = false;
@@ -282,14 +325,16 @@ verifyLastArgument(vector<string>& strToken,string& remained)
             vector<string> matchedString;
             int matchedMinSize=BUFSIZ;
             for (itmapApi=itmapMod->second.begin(); itmapApi!=itmapMod->second.end(); ++itmapApi){
-                if(itmapApi->first.name.substr(0,strToken[1].size()) == strToken[1]){
-                    matchedCnt++;
-                    matchedIndex = itmapApi;
-                    matchedString.push_back(itmapApi->first.name);
-                    if(matchedMinSize > itmapApi->first.name.size()){ 
-                        matchedMinSize = itmapApi->first.name.size();
+                if(itmapApi->first.mode <= mode){       // check mode for api only
+                    if(itmapApi->first.name.substr(0,strToken[1].size()) == strToken[1]){
+                        matchedCnt++;
+                        matchedIndex = itmapApi;
+                        matchedString.push_back(itmapApi->first.name);
+                        if(matchedMinSize > itmapApi->first.name.size()){ 
+                            matchedMinSize = itmapApi->first.name.size();
+                        }
+                        //cout << "found >1> mapApi first : " << itmapApi->first.name << " => " << itmapApi->first.desc << " => " << itmapApi->first.type << " token[" << strToken[1] << "]" << endl;
                     }
-                    //cout << "found >1> mapApi first : " << itmapApi->first.name << " => " << itmapApi->first.desc << " => " << itmapApi->first.type << " token[" << strToken[1] << "]" << endl;
                 }
                 //cout << ">1> mapApi first : " << itmapApi->first.name << " => " << itmapApi->first.desc << " => " << itmapApi->first.type << endl;
             }
@@ -300,27 +345,27 @@ verifyLastArgument(vector<string>& strToken,string& remained)
             if(itmapMod->second.size() == 0){
                 cout << endl << "recommend : <CR>" << endl;
             } else {
+                if(matchedCnt == 0){
+                }
                 cout << endl << "recommend LIST:" << endl;
             }
             for (itmapApi=itmapMod->second.begin(); itmapApi!=itmapMod->second.end(); ++itmapApi){
-                if(itmapApi->first.name.substr(0,strToken[1].size()) == strToken[1]){
-                    cout << "\t";
-                    for(int i=0;i<1;i++){
-                        cout << strToken[i] << " ";
+                if(itmapApi->first.mode <= mode){       // check mode for api only
+                    if(itmapApi->first.name.substr(0,strToken[1].size()) == strToken[1]){
+                        cout << "\t";
+                        cout << strToken[0] << " ";
+                        cout << itmapApi->first.name << " <= description:" << itmapApi->first.desc << "[" << itmapApi->first.type << "]" << endl;
+                        cout << "\t\tex>";
+                        cout << strToken[0] << " ";     // module name
+                        cout << itmapApi->first.name << " "; // api name
+                        for (vectorArg::iterator itvectorArg=itmapApi->second.begin(); itvectorArg!=itmapApi->second.end(); ++itvectorArg){
+                            cout << itvectorArg->name << "<" << itvectorArg->type << "> ";
+                        }
+                        cout << "<CR>" << endl;
                     }
-                    cout << itmapApi->first.name << " <= description:" << itmapApi->first.desc << "[" << itmapApi->first.type << "]" << endl;
-                    cout << "\t\tex>";
-                    for(int i=0;i<1;i++){
-                        cout << strToken[i] << " ";
-                    }
-                    cout << itmapApi->first.name << " ";
-                    for (vectorArg::iterator itvectorArg=itmapApi->second.begin(); itvectorArg!=itmapApi->second.end(); ++itvectorArg){
-                        cout << itvectorArg->name << "<" << itvectorArg->type << "> ";
-                    }
-                    cout << "<CR>" << endl;
                 }
             }
-            if(matchedCnt > 0){ 
+            if(matchedCnt > 0){ // matchedCnt >= 2
                 //;; cout << "matchedCount:" << matchedCnt << " ";
                 strToken[1] = findCommonString(matchedString,matchedMinSize);
                 remained = strToken[1]; 
@@ -382,12 +427,14 @@ list()
     for (mapMod::iterator itmapMod=rootmod.begin(); itmapMod!=rootmod.end(); ++itmapMod){
         cout << "- " << itmapMod->first.name << " <= description : " << itmapMod->first.desc << endl;
         for (mapApi::iterator itmapApi=itmapMod->second.begin(); itmapApi!=itmapMod->second.end(); ++itmapApi){
-            cout << "\texample> " << itmapMod->first.name << " " << itmapApi->first.name << " ";
-            for (vectorArg::iterator itvectorArg=itmapApi->second.begin(); itvectorArg!=itmapApi->second.end(); ++itvectorArg){
-                cout << itvectorArg->name << "<" << itvectorArg->type << "> ";
+            if(itmapApi->first.mode <= mode){
+                cout << "\tAPI : " << itmapMod->first.name << " " << itmapApi->first.name << " ";
+                for (vectorArg::iterator itvectorArg=itmapApi->second.begin(); itvectorArg!=itmapApi->second.end(); ++itvectorArg){
+                    cout << itvectorArg->name << "<" << itvectorArg->type << "> ";
+                }
+                cout << endl;
+                cout << "\t\t\tAPI description : " << itmapApi->first.desc << endl;
             }
-            cout << endl;
-            cout << "\t\t\tAPI description : " << itmapApi->first.desc << endl;
         }
     }
     cout << endl;
@@ -579,9 +626,19 @@ loop(string& s)
     return 1;
 }
 
+
 int 
-main()
+main(int argc,char *argv[])
 {
+    if(argc > 1){
+        //printf("%d %s\n",argc,argv[1]);
+        if( (strlen(PASSWORD) == strlen(argv[1])) &&
+            (strncmp(PASSWORD,argv[1],strlen(PASSWORD)) == 0) ){
+            mode = ModeType::Privileged;
+        }
+    }
+
+    cout << "MODE : " << mode << endl;
 
     for (mapMod::iterator itmapMod=rootmod.begin(); itmapMod!=rootmod.end(); ++itmapMod){
         cout << "mapMod first : " << itmapMod->first.name << " => " << itmapMod->first.desc << " => " << itmapMod->first.type << endl;
