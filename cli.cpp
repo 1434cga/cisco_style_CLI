@@ -37,6 +37,7 @@ public:
     string desc;
     ArgumentType type;
     Argument(string n , string d, ArgumentType t) : name(n),desc(d),type(t){}
+    Argument(){}
     ~Argument() {}
     bool operator< (const Argument& userObj) const
     {
@@ -400,7 +401,7 @@ printPrompt(vector<string>& strToken,const string remained)
     string prompt;
     int hasArgFlag = 0;
 
-    prompt +=  "[" + to_string(strToken.size()) + ":" + to_string(strToken[strToken.size()-1].size()) + "]" + "P>";
+    prompt +=  "[" + to_string(strToken.size()) + ":" + to_string((strToken.size() >= 1 ? strToken[strToken.size()-1].size():0)) + "]" + "P>";
     cout << prompt;
 
     mapMod::iterator itmapMod;
@@ -437,6 +438,8 @@ printPrompt(vector<string>& strToken,const string remained)
         }
     }
     cout << remained;
+
+    return ;
 }
 
 int
