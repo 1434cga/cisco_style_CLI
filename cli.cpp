@@ -307,6 +307,11 @@ verifyLastArgument(vector<string>& strToken,string& remained)
 void
 show_history()
 {
+    /*
+     * sldd>  means that this is right command to send the command to sldd.
+     * >  means that this is proper command. but it is not sldd command.  This is internal commands.
+     * ! means wrong command.
+     */
     cout << endl << "::HISTORY::" << endl;
     for(int i=0;i<vectorHistory.size();i++){
         cout << " [" << i << "] " << vectorHistory[i] << endl;
