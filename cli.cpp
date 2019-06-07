@@ -66,6 +66,7 @@ public:
 };
 
 #define PASSWORD "root"
+#define VERSION  "1.0"
 string command = "sldd";
 ModeType mode = ModeType::Normal;
 
@@ -96,6 +97,13 @@ mapApi testapi = {
 
 
 mapMod rootmod = {       // mapMod
+    {       // mapMod map <Argument,mapApi>
+        {"mode" , "show the mode in Normal / Privileged " , ArgumentType::None , ModeType::Normal }, // Argument
+        {   // mapApi
+            { // mapApi map
+            },
+        }
+    },
     {       // mapMod map <Argument,mapApi>
         {"version" , "version" , ArgumentType::None , ModeType::Normal }, // Argument
         {   // mapApi
@@ -405,7 +413,7 @@ verifyLastArgument(vector<string>& strToken,string& remained)
 }
 
 void
-history()
+show_history()
 {
     cout << endl << "::HISTORY::" << endl;
     for(int i=0;i<vectorHistory.size();i++){
@@ -415,13 +423,19 @@ history()
 }
 
 void
-version()
+show_version()
 {
-    cout << endl << "version 1.0" << endl;
+    cout << endl << "version " << VERSION << endl;
 }
 
 void
-list()
+show_mode()
+{
+    cout << endl << "mode is " << mode << endl;
+}
+
+void
+show_list()
 {
     cout << endl << "::LIST::" << endl;
     for (mapMod::iterator itmapMod=rootmod.begin(); itmapMod!=rootmod.end(); ++itmapMod){
@@ -616,10 +630,11 @@ loop(string& s)
     }
 
     if(strToken[0] == "quit"){ cout << endl << "quit<cr>" << endl; return 0; }
-    if(strToken[0] == "list"){ list(); }
-    if(strToken[0] == "help"){ list(); }
-    if(strToken[0] == "version"){ version(); }
-    if(strToken[0] == "history"){ history(); }
+    if(strToken[0] == "list"){ show_list(); }
+    if(strToken[0] == "help"){ show_list(); }
+    if(strToken[0] == "version"){ show_version(); }
+    if(strToken[0] == "history"){ show_history(); }
+    if(strToken[0] == "mode"){ show_mode(); }
 
     vectorHistory.push_back(hs);
 
