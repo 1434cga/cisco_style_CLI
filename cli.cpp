@@ -544,6 +544,7 @@ main(int argc,char *argv[])
 
     cout << "MODE : " << mode << endl;
 
+    /*
     for (mapMod::iterator itmapMod=rootmod.begin(); itmapMod!=rootmod.end(); ++itmapMod){
         cout << "mapMod first : " << itmapMod->first.name << " => " << itmapMod->first.desc << " => " << itmapMod->first.type << endl;
         for (mapApi::iterator itmapApi=itmapMod->second.begin(); itmapApi!=itmapMod->second.end(); ++itmapApi){
@@ -555,6 +556,7 @@ main(int argc,char *argv[])
         }
     }
     cout << endl;
+    */
 
 
     struct termios old_tio, new_tio;
