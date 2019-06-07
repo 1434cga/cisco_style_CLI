@@ -14,6 +14,7 @@ using namespace std;
 
 enum class ArgumentType {
     None,
+    Sldd,
     String,
     Int,
     Uint,
@@ -26,6 +27,7 @@ std::ostream& operator << (std::ostream& os, const ArgumentType &at)
     switch(at)
     {
         case ArgumentType::None: os << "None"; break;
+        case ArgumentType::Sldd: os << "Sldd"; break;
         case ArgumentType::String: os << "String"; break;
         case ArgumentType::Int: os << "Int"; break;
         case ArgumentType::Uint: os << "Uint"; break;
@@ -89,6 +91,8 @@ verifyTokenType(const string& s,const ArgumentType& t)
     if(s.size() == 0){ return false; }
     switch(t){
         case ArgumentType::None: 
+            return true;
+        case ArgumentType::Sldd: 
             return true;
         case ArgumentType::String: 
             return true;
@@ -392,44 +396,49 @@ printPrompt(vector<string>& strToken,const string remained)
 }
 
 int
-getArgCount(vector<string>& strToken)
+getArgCount(vector<string>& strToken , ArgumentType& at)
 {
     int ret = 0;
     mapMod::iterator itmapMod;
-    //;; cout << "{" << strToken.size() << "}";
+    if(strToken.size() == 0){
+        return 0;
+    }
     if(strToken.size() >= 1){
         for (itmapMod=rootmod.begin(); itmapMod!=rootmod.end(); ++itmapMod){
             if(itmapMod->first.name == strToken[0]){
+                at = itmapMod->first.type;
                 ret++;
                 break;
             }
         }
-    }
-    mapApi::iterator itmapApi;
-    if(strToken.size() >= 2){
-        for (itmapApi=itmapMod->second.begin(); itmapApi!=itmapMod->second.end(); ++itmapApi){
-            if(itmapApi->first.name == strToken[1]){
-                ret++;
-                break;
+
+        if(strToken.size() >= 2){
+            mapApi::iterator itmapApi;
+            for (itmapApi=itmapMod->second.begin(); itmapApi!=itmapMod->second.end(); ++itmapApi){
+                if(itmapApi->first.name == strToken[1]){
+                    ret++;
+                    break;
+                }
             }
+            if(strToken.size() >= 3){
+                for (vectorArg::iterator itvectorArg=itmapApi->second.begin(); itvectorArg!=itmapApi->second.end(); ++itvectorArg){
+                    ret++;
+                }
+            } else {
+                if(itmapApi->second.size() != 0) return -1;
+            }
+        } else {    // strToken.size() == 1
+            //cout << itmapMod->second.size() << endl;
+            if(itmapMod->second.size() != 0) return -1;
         }
-    } else {
-        if(itmapMod->second.size() == 0) return 1;
-        return -1;
     }
 
-    if(strToken.size() >= 3){
-        for (vectorArg::iterator itvectorArg=itmapApi->second.begin(); itvectorArg!=itmapApi->second.end(); ++itvectorArg){
-            ret++;
-        }
-    } 
-
-    //;; cout << "[r"<<ret<<",t"<<strToken.size()<<"]";;
+    //;; cout << "[r"<<ret<<",t"<<strToken.size()<<"]" << endl;;
     return ret;
 }
 
 int 
-loop(string& s)
+loop(string& s,int& isCompleteSldd)
 {
     int level = 1;
     static int cnt = 0;
@@ -511,18 +520,30 @@ loop(string& s)
         s += ' ';
     }
     string hs;
-    if(getArgCount(strToken) == strToken.size()){
-        hs = "> " + s;
+    ArgumentType at = ArgumentType::None ;
+    if( (strToken.size() >= 1) && (getArgCount(strToken,at) == strToken.size()) ){
+        //hs = "> " + s + ":r" + to_string(getArgCount(strToken,at)) + ":t" + to_string(strToken.size());
+        //cout << hs << endl;
+        if(at == ArgumentType::Sldd){
+            hs = "sldd> " + s;
+            isCompleteSldd = 1;
+        } else {
+            hs = "> " + s;
+        }
     } else {
+        //hs = "! " + s + ":r" + to_string(getArgCount(strToken,at)) + ":t" + to_string(strToken.size());
+        //cout << hs << endl;
         hs = "! " + s;
     }
 
-    if(strToken[0] == "quit"){ cout << endl << "quit<cr>" << endl; return 0; }
-    if(strToken[0] == "list"){ show_list(); }
-    if(strToken[0] == "help"){ show_list(); }
-    if(strToken[0] == "version"){ show_version(); }
-    if(strToken[0] == "history"){ show_history(); }
-    if(strToken[0] == "mode"){ show_mode(); }
+    if(strToken.size() >= 1){
+        if(strToken[0] == "quit"){ cout << endl << "quit<cr>" << endl; return 0; }
+        if(strToken[0] == "list"){ show_list(); }
+        if(strToken[0] == "help"){ show_list(); }
+        if(strToken[0] == "version"){ show_version(); }
+        if(strToken[0] == "history"){ show_history(); }
+        if(strToken[0] == "mode"){ show_mode(); }
+    }
 
     vectorHistory.push_back(hs);
 
@@ -568,10 +589,13 @@ main(int argc,char *argv[])
     int ct=1;
     while(ct){
         string s;
-        ct = loop(s);
+        int isCompleteSldd = 0;
+        ct = loop(s,isCompleteSldd);
         cout << endl << endl;
-        //cout <<"Command:" << command << " [" << s << "]" << endl << endl;
-        cout <<"Command:" << command << " " << s << endl << endl;
+        if(isCompleteSldd){
+            //cout <<"Command:" << command << " [" << s << "]" << endl << endl;
+            cout <<"Command:" << command << " " << s << endl << endl;
+        }
     }
 
     tcsetattr(STDIN_FILENO, TCSANOW, &old_tio);

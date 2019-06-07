@@ -24,47 +24,35 @@ mapMod rootmod = {       // mapMod
     {       // mapMod map <Argument,mapApi>
         {"mode" , "show the mode in Normal / Privileged " , ArgumentType::None , ModeType::Normal }, // Argument
         {   // mapApi
-            { // mapApi map
-            },
         }
     },
     {       // mapMod map <Argument,mapApi>
         {"version" , "version" , ArgumentType::None , ModeType::Normal }, // Argument
         {   // mapApi
-            { // mapApi map
-            },
         }
     },
     {       // mapMod map <Argument,mapApi>
         {"quit" , "quit program" , ArgumentType::None , ModeType::Normal }, // Argument
         {   // mapApi
-            { // mapApi map
-            },
         }
     },
     {       // mapMod map <Argument,mapApi>
         {"list" , "show all command lists" , ArgumentType::None , ModeType::Normal }, // Argument
         {   // mapApi
-            { // mapApi map
-            },
         }
     },
     {       // mapMod map <Argument,mapApi>
         {"help" , "show all command lists" , ArgumentType::None , ModeType::Normal }, // Argument
         {   // mapApi
-            { // mapApi map
-            },
         }
     },
     {       // mapMod map <Argument,mapApi>
         {"history" , "history" , ArgumentType::None , ModeType::Normal }, // Argument
         {   // mapApi
-            { // mapApi map
-            },
         }
     },
     {       // mapMod map <Argument,mapApi>
-        {"testwifi" , "wifi is our first module" , ArgumentType::None , ModeType::Normal }, // Argument
+        {"testwifi" , "wifi is our first module" , ArgumentType::Sldd , ModeType::Normal }, // Argument
         {   // mapApi
             { // mapApi map
                 {"wifi-api1" , "wifi-api1 is our first module" , ArgumentType::None , ModeType::Normal }, // Argument
@@ -101,7 +89,7 @@ mapMod rootmod = {       // mapMod
         }
     },
     {       // mapMod map <Argument,mapApi>
-        {"testdongle" , "dongle is our first module" , ArgumentType::None , ModeType::Normal }, // Argument
+        {"testdongle" , "dongle is our first module" , ArgumentType::Sldd , ModeType::Normal }, // Argument
         {   // mapApi
             { // mapApi map
                 {"dongle-api" , "dongle-api is our first module" , ArgumentType::None , ModeType::Normal }, // Argument
