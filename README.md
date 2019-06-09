@@ -1,5 +1,5 @@
-# cisco_style_CLI
-cisco style command line interface
+# cisco_style_CLI (cisco style command line interface)
+- travis-CI [![Build Status](https://travis-ci.com/cheoljoo/cisco_style_CLI.svg?branch=master)](https://travis-ci.com/cheoljoo/cisco_style_CLI)
 
 - init & test c - enum / initialize map vector class
 - add various example of map with user-defined class /struct as a key
