@@ -354,7 +354,7 @@ show_list()
 void
 printPrompt(vector<string>& strToken,const string remained)
 {
-    cout << endl;
+    ////;; cout << endl;
 
     string prompt;
     int hasArgFlag = 0;
@@ -479,11 +479,12 @@ loop(string& s,int& isCompleteSldd)
                 if(verifyLastArgument(strToken,remained)){
                     token.clear();
                     cout << ' ';
+                    ;;;; cout << endl;
                     printPrompt(strToken,remained);
                 } else {
                     strToken.pop_back();
                     s.clear();
-                    cout << endl;
+                    ////;; cout << endl;
                     for(int i=0;i<strToken.size();i++){
                         s += strToken[i];
                         s += ' ';
