@@ -28,4 +28,10 @@
     - show 2 lines when we input arguments.
         - one is helping line with arguement name and type
         - the other is just your input.
+## features
+- if you do not know how to use it ,  press space or tab on prompt.
+- you do not need the manual if you use it.
+- it supports two mode. (Normal / Privileged)
+    - Privileged : you can see all APIs.
+    - Normal : you can see APIs except privileged API.
 
