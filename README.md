@@ -1,4 +1,4 @@
-# Developers:wq
+# Developers
 - travis-CI [![Build Status](https://travis-ci.com/cheoljoo/cisco_style_CLI.svg?branch=master)](https://travis-ci.com/cheoljoo/cisco_style_CLI)
 - codedocs [![Documentation](https://codedocs.xyz/cheoljoo/cisco_style_CLI.svg)](https://codedocs.xyz/cheoljoo/cisco_style_CLI/)
 - coverity <a href="https://scan.coverity.com/projects/cheoljoo-cisco_style_cli"> <img alt="Coverity Scan Build Status" src="https://scan.coverity.com/projects/18571/badge.svg"/> </a>
