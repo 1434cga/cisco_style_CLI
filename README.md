@@ -1,6 +1,12 @@
-# cisco_style_CLI (cisco style command line interface)
+# travis-ci
 - travis-CI [![Build Status](https://travis-ci.com/cheoljoo/cisco_style_CLI.svg?branch=master)](https://travis-ci.com/cheoljoo/cisco_style_CLI)
 
+## references
+- [Deploying an R Markdown Jekyll site to GitHub Pages](https://selbydavid.com/2017/06/16/rmarkdown-jekyll/)
+- [Travis Account](https://travis-ci.com)
+
+
+# cisco_style_CLI (cisco style command line interface)
 - init & test c - enum / initialize map vector class
 - add various example of map with user-defined class /struct as a key
 - make cisco input method with the same of Argument element
