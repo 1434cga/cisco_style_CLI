@@ -1,3 +1,1 @@
-cli.cpp :  find proper sldd command
-- cli.cpp : fix some bugs in getArgCount() and loop()
-- cli.h :  Argument::Sldd
+cli.cpp : use posix_spawn() instead of system()  & remove warning of converting string into char *

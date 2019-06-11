@@ -6,12 +6,10 @@
 #include <unistd.h>
 #include <string.h>
 #include <stdlib.h>
-
+#include <spawn.h>
+#include <sys/wait.h>
 
 using namespace std;
-
-
-
 
 enum class ArgumentType {
     None,
@@ -558,6 +556,25 @@ loop(string& s,int& isCompleteSldd)
     return 1;
 }
 
+void run_cmd(char *cmd)                                                 
+{
+    pid_t pid;                                                          
+    char *argv[] = {(char *)"sh", (char *)"-c", cmd, (char *) NULL};                             
+    int status;
+
+    printf("Run command: %s\n", cmd);                                   
+    status = posix_spawn(&pid, "/bin/sh", NULL, NULL, argv, environ);   
+    if (status == 0) {
+        printf("Child pid: %i\n", pid);                                 
+        if (waitpid(pid, &status, 0) != -1) {                           
+            printf("Child exited with status %i\n", status);
+        } else {                                                        
+            perror("waitpid");                                          
+        }
+    } else {                                                            
+        printf("posix_spawn: %s\n", strerror(status));                  
+    }
+}                
 
 int 
 main(int argc,char *argv[])
@@ -605,7 +622,7 @@ main(int argc,char *argv[])
 
             char temp[BUFSIZ];
             snprintf(temp,BUFSIZ,"%s %s",command.c_str(),s.c_str());
-            system(temp);
+            run_cmd(temp);
         }
     }
 
