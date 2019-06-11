@@ -5,6 +5,7 @@
 #include <termios.h>
 #include <unistd.h>
 #include <string.h>
+#include <stdlib.h>
 
 
 using namespace std;
@@ -601,6 +602,10 @@ main(int argc,char *argv[])
         if(isCompleteSldd){
             //cout <<"Command:" << command << " [" << s << "]" << endl << endl;
             cout <<"Command:" << command << " " << s << endl << endl;
+
+            char temp[BUFSIZ];
+            snprintf(temp,BUFSIZ,"%s %s",command.c_str(),s.c_str());
+            system(temp);
         }
     }
 
